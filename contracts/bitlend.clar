@@ -295,3 +295,47 @@
     protocol-fee: (var-get protocol-fee),
   }
 )
+
+;; GOVERNANCE & ADMINISTRATION
+
+;; Update minimum collateral ratio (owner only)
+(define-public (set-minimum-collateral-ratio (new-ratio uint))
+  (begin
+    (asserts! (is-eq tx-sender CONTRACT-OWNER) ERR-NOT-AUTHORIZED)
+    (asserts!
+      (and
+        (>= new-ratio MIN-COLLATERAL-RATIO)
+        (<= new-ratio MAX-COLLATERAL-RATIO)
+      )
+      ERR-INVALID-PARAMETER
+    )
+    (var-set minimum-collateral-ratio new-ratio)
+    (ok true)
+  )
+)
+
+;; Update liquidation threshold (owner only)
+(define-public (set-liquidation-threshold (new-threshold uint))
+  (begin
+    (asserts! (is-eq tx-sender CONTRACT-OWNER) ERR-NOT-AUTHORIZED)
+    (asserts!
+      (and
+        (>= new-threshold MIN-COLLATERAL-RATIO)
+        (<= new-threshold (var-get minimum-collateral-ratio))
+      )
+      ERR-INVALID-PARAMETER
+    )
+    (var-set liquidation-threshold new-threshold)
+    (ok true)
+  )
+)
+
+;; Update protocol fee (owner only)
+(define-public (set-protocol-fee (new-fee uint))
+  (begin
+    (asserts! (is-eq tx-sender CONTRACT-OWNER) ERR-NOT-AUTHORIZED)
+    (asserts! (<= new-fee MAX-PROTOCOL-FEE) ERR-INVALID-PARAMETER)
+    (var-set protocol-fee new-fee)
+    (ok true)
+  )
+)
